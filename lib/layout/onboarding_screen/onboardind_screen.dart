@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/modules/login_screen/login_screen.dart';
-import 'package:shop_app/shared/components/components.dart';
-import 'package:shop_app/shared/components/constants.dart';
+import 'package:shop_app/shared_1/components/components.dart';
+import 'package:shop_app/shared_1/components/constants.dart';
+import 'package:shop_app/shared_1/network/local/cache_helper.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnBoardingScreen extends StatefulWidget {
@@ -18,13 +19,17 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   ];
   bool isLast=false;
   var pageController=PageController();
+  void submit(){
+    CacheHelper.saveData(key: 'onBoarding', value: true);
+    navigateAndFinish(context, LoginScreen());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          TextButton(onPressed: ()=>navigateAndFinish(context, LoginScreen()), child: Text('SKIP')),
+          TextButton(onPressed: submit, child: Text('SKIP')),
         ],
       ),
       body: Padding(
@@ -62,7 +67,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 FloatingActionButton(
                   onPressed: (){
                     if(isLast){
-                      navigateAndFinish(context, LoginScreen());
+                      submit();
                     }
                     else {
                       pageController.nextPage(

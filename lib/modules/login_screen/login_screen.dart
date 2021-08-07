@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shop_app/modules/layout_screen/layout_screen.dart';
 import 'package:shop_app/modules/register_screen/shop_register_screen.dart';
-import 'package:shop_app/shared/components/components.dart';
-import 'package:shop_app/shared/cubit/login_cubit/login_cubit.dart';
-import 'package:shop_app/shared/cubit/login_cubit/login_states.dart';
+import 'package:shop_app/shared_1/components/components.dart';
+import 'package:shop_app/shared_1/components/constants.dart';
+import 'package:shop_app/shared_1/cubit/login_cubit/login_cubit.dart';
+import 'package:shop_app/shared_1/cubit/login_cubit/login_states.dart';
+import 'package:shop_app/shared_1/cubit/shop_cubit/shop_cubit.dart';
+import 'package:shop_app/shared_1/network/local/cache_helper.dart';
 
 class LoginScreen extends StatelessWidget {
 
@@ -72,13 +76,18 @@ class LoginScreen extends StatelessWidget {
                         }
                       ),
                       SizedBox(height: 30,),
-                      (state is ShopLoginLoadingState)?Center(child: CircularProgressIndicator()):defaultButton(text: 'login', function: (){
+                      (state is ShopLoginLoadingState)?Center(child: CircularProgressIndicator()):
+                      defaultButton(
+                        text: 'login',
+                        function: (){
                         if(formKey.currentState!.validate()) {
                                   ShopLoginCubit.get(context).userLogin(
                                       email: emailController.text,
                                       password: passwordController.text);
                                 }
-                              },isUpperCase: true,),
+                              },
+                        isUpperCase: true,
+                      ),
                       SizedBox(height: 30,),
                       Row(children: [
                         Text('Don\'t have an account? '),
@@ -93,7 +102,22 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
         ),
-        listener: (context,state){},
+        listener: (context,state){
+          if(state is ShopLoginSuccessState)
+            {
+              if(state.shopLoginModel.status!){
+
+                CacheHelper.saveData(key: 'token', value: state.shopLoginModel.data!.token).then((value){
+                  token=state.shopLoginModel.data!.token;
+                  ShopCubit.get(context).changeBottomNavBar(0);
+                  navigateAndFinish(context, ShopLayoutScreen());
+                });
+
+              }else{
+                showToast(state: ToastState.ERROR,msg: state.shopLoginModel.message!);
+              }
+            }
+        },
       ),
     );
   }
